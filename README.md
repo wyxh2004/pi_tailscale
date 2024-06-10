@@ -2,9 +2,9 @@
 
 本项目基于 https://github.com/wukongdaily/OrangePiShell 修改，主要变动为使用**tailscale**实现内网穿透，同时进行了一些删改
 
-### 适用于 `Ubuntu` / `Debian` / `Synology` 等基于 Debian 的 Linux 脚本
+### 适用于 `Ubuntu` / `Debian` / `Synology` 等基于 Debian 的 Linux 脚本 （需要科学上网环境）
 ```bash
-wget -qO pi.sh https://cafe.cpolar.cn/wkdaily/zero3/raw/branch/main/zero3/pi.sh && chmod +x pi.sh && ./pi.sh
+wget -qO pi.sh https://raw.githubusercontent.com/wyxh2004/pi_tailscale/main/zero3/pi.sh?token=GHSAT0AAAAAACSLUWU7L4PQUXFNL3ZXM2KQZS4NNPQ && chmod +x pi.sh && ./pi.sh
 ```
 
 <!-- ### OpenWrt / iStoreOS 软路由系统
@@ -79,3 +79,4 @@ https://github.com/power721/alist-tvbox/blob/master/doc/README_zh.md
 # 参考项目
 - https://github.com/DDS-Derek/xiaoya-alist
 - https://har01d.cn/#/notes/alist-tvbox
+144444444441k
