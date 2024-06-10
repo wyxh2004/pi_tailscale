@@ -34,7 +34,7 @@ menu_options=(
     "修改阿里云盘Token(32位)"
     "修改阿里云盘OpenToken(335位)"
     "修改小雅转存文件夹ID(40位)"
-    "安装内网穿透工具Cpolar"
+    "安装内网穿透工具tailscale"
     "安装盒子助手docker版"
     "安装特斯拉伴侣TeslaMate"
     "安装CasaOS面板"
@@ -51,17 +51,16 @@ commands=(
     ["安装alist"]="install_alist"
     ["安装小雅alist"]="install_xiaoya_alist"
     ["安装小雅转存清理工具"]="install_xiaoya_keeper"
+    ["安装小雅tvbox"]="install_xiaoya_tvbox"
     ["修改阿里云盘Token(32位)"]="update_aliyunpan_token"
     ["修改阿里云盘OpenToken(335位)"]="update_aliyunpan_opentoken"
     ["修改小雅转存文件夹ID(40位)"]="update_aliyunpan_folder_id"
-    ["安装内网穿透工具Cpolar"]="install_cpolar"
+    ["安装内网穿透工具tailscale"]="install_tailscale"
     ["安装盒子助手docker版"]="install_wukongdaily_box"
-    ["安装CasaOS面板"]="install_casaos"
-    ["更新脚本"]="update_scripts"
-    ["安装小雅tvbox"]="install_xiaoya_tvbox"
     ["安装特斯拉伴侣TeslaMate"]="install_teslamate"
+    ["安装CasaOS面板"]="install_casaos"
     ["安装内网穿透工具DDNSTO"]="install_ddnsto"
-
+    ["更新脚本"]="update_scripts"
 )
 
 # 更新系统软件包
@@ -230,7 +229,7 @@ start_filemanager() {
     green "filebrowser 文件管理器已启动，可以通过 http://${host_ip}:8080 访问"
     green "登录用户名：admin"
     green "默认密码：admin（请尽快修改密码）"
-    sudo wget -O /etc/systemd/system/filebrowser.service "https://cafe.cpolar.cn/wkdaily/zero3/raw/branch/main/filebrowser.service"
+    sudo wget -O /etc/systemd/system/filebrowser.service "https://cafe.cpolar.cn/wkdaily/zero3/raw/branch/main/filebroer.service"
     sudo chmod +x /etc/systemd/system/filebrowser.service
     sudo systemctl daemon-reload              # 重新加载systemd配置
     sudo systemctl start filebrowser.service  # 启动服务
@@ -296,7 +295,7 @@ install_xiaoya_alist() {
         阿里云盘转存目录folder id:   https://www.aliyundrive.com/s/rP9gP3h9asE
         '
     # 调用修改后的脚本
-    bash -c "$(curl https://cafe.cpolar.cn/wkdaily/zero3/raw/branch/main/xiaoya/xiaoya.sh)"
+    bash -c "$(curl https://raw.githubusercontent.com/wyxh2004/pi_tailscale/main/xiaoya/xiaoya.sh)"
     # 检查xiaoyaliu/alist 是否运行，如果运行了 则提示下面的信息，否则退出
     if ! docker ps | grep -q "xiaoyaliu/alist"; then
         echo "Error: xiaoyaliu/alist Docker 容器未运行"
@@ -408,30 +407,52 @@ update_aliyunpan_folder_id() {
 }
 
 # 安装内网穿透
-install_cpolar() {
-    local host_ip
-    host_ip=$(hostname -I | awk '{print $1}')
-    curl -L https://www.cpolar.com/static/downloads/install-release-cpolar.sh | sudo bash
-    if command -v cpolar &>/dev/null; then
-        # 提示用户输入 token
-        green "访问 https://dashboard.cpolar.com/auth  复制您自己的AuthToken"
-        read -p "请输入您的 AuthToken: " token
-        # 执行 cpolar 命令并传入 token
-        cpolar authtoken "$token"
-        # 向系统添加服务
-        green "正在向系统添加cpolar服务"
-        sudo systemctl enable cpolar
-        # 启动服务
-        green "正在启动cpolar服务"
-        sudo systemctl start cpolar
-        # 查看状态
-        green "cpolar服务状态如下"
-        sudo systemctl status cpolar | tee /dev/tty
-        green 浏览器访问:http://${host_ip}:9200/#/tunnels/list 创建隧道
+install_tailscale() {
+    # local host_ip
+    # host_ip=$(hostname -I | awk '{print $1}')
+    # curl -L https://www.cpolar.com/static/downloads/install-release-cpolar.sh | sudo bash
+    # if command -v cpolar &>/dev/null; then
+    #     # 提示用户输入 token
+    #     green "访问 https://dashboard.cpolar.com/auth  复制您自己的AuthToken"
+    #     read -p "请输入您的 AuthToken: " token
+    #     # 执行 cpolar 命令并传入 token
+    #     cpolar authtoken "$token"
+    #     # 向系统添加服务
+    #     green "正在向系统添加cpolar服务"
+    #     sudo systemctl enable cpolar
+    #     # 启动服务
+    #     green "正在启动cpolar服务"
+    #     sudo systemctl start cpolar
+    #     # 查看状态
+    #     green "cpolar服务状态如下"
+    #     sudo systemctl status cpolar | tee /dev/tty
+    #     green 浏览器访问:http://${host_ip}:9200/#/tunnels/list 创建隧道
 
+    # else
+    #     red "错误：cpolar 命令未找到，请先安装 cpolar。"
+    # fi
+
+    # 检查是否已安装Tailscale
+    if ! command -v tailscale; then
+        echo "Tailscale未安装，正在安装..."
     else
-        red "错误：cpolar 命令未找到，请先安装 cpolar。"
+        echo "Tailscale已安装，无需重新安装。"
+        exit 0
     fi
+
+    green "正在下载Tailscale安装脚本..."
+
+    curl -fsSL https://tailscale.com/install.sh | sh
+    
+    # 检查是否已成功安装Tailscale
+    if ! command -v tailscale; then
+        red "安装失败，请手动安装Tailscale。"
+    else
+        green "安装成功，Tailscale已成功安装。执行 sudo tailscale up 启动tailscale"
+    fi
+
+    green "你的tailscale的IPv4地址是:" $(tailscale ip -4)
+    green "你的tailscale的IPv6地址是:" $(tailscale ip -6)
 }
 
 # 安装盒子助手docker版
@@ -464,7 +485,7 @@ install_casaos() {
 
 # 更新自己
 update_scripts() {
-    wget -O pi.sh https://cafe.cpolar.cn/wkdaily/zero3/raw/branch/main/zero3/pi.sh && chmod +x pi.sh
+    wget -O pi.sh https://raw.githubusercontent.com/wyxh2004/pi_tailscale/main/zero3/pi.sh?token=GHSAT0AAAAAACSLUWU7L4PQUXFNL3ZXM2KQZS4NNPQ && chmod +x pi.sh
     echo "脚本已更新并保存在当前目录 pi.sh,现在将执行新脚本。"
     ./pi.sh
     exit 0
@@ -488,24 +509,6 @@ install_xiaoya_tvbox(){
     用户: guest 
     密码: guest_Api789
     '
-}
-# 安装特斯拉伴侣
-install_teslamate() {
-    check_docker_compose
-    sudo mkdir -p /opt/teslamate/import
-    wget -O /opt/teslamate/docker-compose.yml https://cafe.cpolar.cn/wkdaily/zero3/raw/branch/main/teslamate/docker-compose.yml
-    cd /opt/teslamate
-    sudo docker-compose up -d
-}
-
-check_docker_compose() {
-    if which docker-compose > /dev/null 2>&1; then
-        echo "Docker Compose is installed."
-        docker-compose --version
-    else
-        echo "Docker Compose is not installed. You can install 1panel first."
-        exit 1
-    fi
 }
 
 # 安装DDNSTO 
