@@ -408,52 +408,21 @@ update_aliyunpan_folder_id() {
 
 # 安装内网穿透
 install_tailscale() {
-    # local host_ip
-    # host_ip=$(hostname -I | awk '{print $1}')
-    # curl -L https://www.cpolar.com/static/downloads/install-release-cpolar.sh | sudo bash
-    # if command -v cpolar &>/dev/null; then
-    #     # 提示用户输入 token
-    #     green "访问 https://dashboard.cpolar.com/auth  复制您自己的AuthToken"
-    #     read -p "请输入您的 AuthToken: " token
-    #     # 执行 cpolar 命令并传入 token
-    #     cpolar authtoken "$token"
-    #     # 向系统添加服务
-    #     green "正在向系统添加cpolar服务"
-    #     sudo systemctl enable cpolar
-    #     # 启动服务
-    #     green "正在启动cpolar服务"
-    #     sudo systemctl start cpolar
-    #     # 查看状态
-    #     green "cpolar服务状态如下"
-    #     sudo systemctl status cpolar | tee /dev/tty
-    #     green 浏览器访问:http://${host_ip}:9200/#/tunnels/list 创建隧道
-
-    # else
-    #     red "错误：cpolar 命令未找到，请先安装 cpolar。"
-    # fi
-
+    green "正在下载Tailscale安装脚本..."
+    curl -fsSL https://tailscale.com/install.sh | sh
     # 检查是否已安装Tailscale
     if ! command -v tailscale; then
-        echo "Tailscale未安装，正在安装..."
+        echo "Tailscale未成功安装"
     else
-        echo "Tailscale已安装，无需重新安装。"
+        echo "Tailscale已成功安装，访问以下链接登录你的Tailscale帐号"
         exit 0
     fi
-
-    green "正在下载Tailscale安装脚本..."
-
-    curl -fsSL https://tailscale.com/install.sh | sh
-    
-    # 检查是否已成功安装Tailscale
-    if ! command -v tailscale; then
-        red "安装失败，请手动安装Tailscale。"
-    else
-        green "安装成功，Tailscale已成功安装。执行 sudo tailscale up 启动tailscale"
-    fi
+    tailscale up
 
     green "你的tailscale的IPv4地址是:" $(tailscale ip -4)
     green "你的tailscale的IPv6地址是:" $(tailscale ip -6)
 }
+
 
 # 安装盒子助手docker版
 install_wukongdaily_box() {
